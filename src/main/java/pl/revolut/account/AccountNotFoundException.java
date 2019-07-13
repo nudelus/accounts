@@ -2,7 +2,7 @@ package pl.revolut.account;
 
 public class AccountNotFoundException extends RuntimeException {
 
-    public AccountNotFoundException() {
-        super("Account Not Found");
+    public AccountNotFoundException(String accountNumber) {
+        super("Account not found for accountNumber : "+accountNumber);
     }
 }

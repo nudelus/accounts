@@ -1,14 +1,22 @@
 package pl.revolut.account;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AccountRepository {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountRepository.class);
+
     private Map<String,Account> accountTable = new ConcurrentHashMap<>();
 
     public Account save(Account account) {
-        accountTable.put(account.getNumber(),account);
+        account.setCreationDate(LocalDateTime.now());
+        accountTable.put(account.getAccountNumber(),account);
+        LOGGER.debug("Account saved : {}",account);
         return account;
     }
 
@@ -24,12 +32,18 @@ public class AccountRepository {
         if(!accountTable.containsKey(accountNumber)) {
             return Optional.empty();
         }
+        Account oldAccount = accountTable.get(accountNumber);
+
+        account.setCreationDate(oldAccount.getCreationDate());
+
+        LOGGER.debug("Account modified : {}",account);
         accountTable.put(accountNumber,account);
         return Optional.of(account);
     }
 
     public void delete(String accountNumber) {
         accountTable.remove(accountNumber);
+        LOGGER.debug("Account for accountNumber {} deleted ",accountNumber);
     }
 
     public boolean exists(String accountNumber) {

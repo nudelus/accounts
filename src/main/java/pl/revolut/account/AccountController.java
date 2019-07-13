@@ -15,10 +15,10 @@ public class AccountController {
     private AccountRepository accountRepository = new AccountRepository();
 
     public AccountController() {
-        init();
+        initRouting();
     }
 
-    public void init() {
+    public void initRouting() {
         get("/accounts", getAccounts ,new JsonTransformer());
         get("/accounts/:number", getAccounts ,new JsonTransformer());
         post("/accounts", saveAccount ,new JsonTransformer());
@@ -32,7 +32,7 @@ public class AccountController {
         if(accountNumber != null) {
 
             Optional<Account> account = accountRepository.retrieve(accountNumber);
-            account.orElseThrow(() ->new AccountNotFoundException());
+            account.orElseThrow(() ->new AccountNotFoundException(accountNumber));
             return account.get();
         }
 
@@ -45,7 +45,7 @@ public class AccountController {
     private Route deleteAccount = (Request request, Response response) -> {
         String accountNumber = request.params(":number");
         if(!accountRepository.exists(accountNumber)) {
-            throw new AccountNotFoundException();
+            throw new AccountNotFoundException(accountNumber);
         }
         accountRepository.delete(accountNumber);
         return "";
@@ -55,7 +55,7 @@ public class AccountController {
     private Route modifyAccount = (Request request, Response response) -> {
         String accountNumber = request.params(":number");
         if(!accountRepository.exists(accountNumber)) {
-            throw new AccountNotFoundException();
+            throw new AccountNotFoundException(accountNumber);
         }
 
         Account account = JsonHelper.read(request.body(),Account.class);
