@@ -10,6 +10,7 @@ public class Account {
     private String customerId;
     private String currency;
     private LocalDateTime creationDate;
+    private Double balance;
 
     public String getAccountNumber() {
         return accountNumber;
@@ -51,6 +52,14 @@ public class Account {
         this.creationDate = creationDate;
     }
 
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,12 +69,13 @@ public class Account {
                 accountType == account.accountType &&
                 Objects.equals(customerId, account.customerId) &&
                 Objects.equals(currency, account.currency) &&
-                Objects.equals(creationDate, account.creationDate);
+                Objects.equals(creationDate, account.creationDate) &&
+                Objects.equals(balance, account.balance);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountNumber, accountType, customerId, currency, creationDate);
+        return Objects.hash(accountNumber, accountType, customerId, currency, creationDate, balance);
     }
 
     @Override
@@ -76,6 +86,7 @@ public class Account {
                 ", customerId='" + customerId + '\'' +
                 ", currency='" + currency + '\'' +
                 ", creationDate=" + creationDate +
+                ", balance=" + balance +
                 '}';
     }
 }

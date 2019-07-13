@@ -12,9 +12,10 @@ import static spark.Spark.*;
 
 public class AccountController {
 
-    private AccountRepository accountRepository = new AccountRepository();
+    private AccountRepository accountRepository;
 
-    public AccountController() {
+    public AccountController(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
         initRouting();
     }
 
@@ -26,6 +27,7 @@ public class AccountController {
         put("/accounts/:number", modifyAccount ,new JsonTransformer());
 
     }
+
 
     private Route getAccounts = (Request request, Response response) -> {
         String accountNumber = request.params(":number");
