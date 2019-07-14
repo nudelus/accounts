@@ -36,7 +36,8 @@ public class AccountRepository {
 
         account.setCreationDate(oldAccount.getCreationDate());
 
-        LOGGER.debug("Account modified : {}",account);
+        LOGGER.debug("Account modified from : {}",oldAccount);
+        LOGGER.debug("Account modified to : {}",account);
         accountTable.put(accountNumber,account);
         return Optional.of(account);
     }

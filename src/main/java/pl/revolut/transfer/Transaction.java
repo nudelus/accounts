@@ -11,6 +11,8 @@ public class Transaction {
     private Double amountInOriginalCurrency;
     private TransactionType transactionType;
     private String partnerAccountNumber;
+    private String currency;
+    private Double exchangeRate;
 
     public String getTransactionId() {
         return transactionId;
@@ -66,5 +68,21 @@ public class Transaction {
 
     public void setPartnerAccountNumber(String partnerAccountNumber) {
         this.partnerAccountNumber = partnerAccountNumber;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public Double getExchangeRate() {
+        return exchangeRate;
+    }
+
+    public void setExchangeRate(Double exchangeRate) {
+        this.exchangeRate = exchangeRate;
     }
 }

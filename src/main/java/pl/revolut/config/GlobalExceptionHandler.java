@@ -4,6 +4,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.revolut.account.AccountNotFoundException;
+import pl.revolut.transfer.InsufficientFundsException;
 import pl.revolut.util.ErrorMessage;
 import pl.revolut.util.JsonHelper;
 
@@ -15,6 +16,14 @@ public final class GlobalExceptionHandler {
 
     public static void init() {
         exception(AccountNotFoundException.class, (exception, request, response) -> {
+            response.status(HttpStatus.BAD_REQUEST_400);
+
+            ErrorMessage errorMessage = new ErrorMessage(exception.getMessage());
+            LOGGER.error(exception.getMessage());
+            response.body(JsonHelper.write(errorMessage));
+        });
+
+        exception(InsufficientFundsException.class, (exception, request, response) -> {
             response.status(HttpStatus.BAD_REQUEST_400);
 
             ErrorMessage errorMessage = new ErrorMessage(exception.getMessage());
