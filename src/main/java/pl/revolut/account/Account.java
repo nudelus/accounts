@@ -69,7 +69,6 @@ public class Account {
                 accountType == account.accountType &&
                 Objects.equals(customerId, account.customerId) &&
                 Objects.equals(currency, account.currency) &&
-                Objects.equals(creationDate, account.creationDate) &&
                 Objects.equals(balance, account.balance);
     }
 
