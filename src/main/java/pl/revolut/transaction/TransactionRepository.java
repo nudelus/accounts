@@ -1,4 +1,4 @@
-package pl.revolut.transfer;
+package pl.revolut.transaction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +32,11 @@ public class TransactionRepository {
 
     public void removeTransaction(String transactionId) {
         transactionTable.entrySet().forEach(e -> e.getValue().removeIf(t -> t.getTransactionId().equals(transactionId)));
+    }
+
+
+    public List<Transaction> getTransactions(String accountNumber) {
+        return transactionTable.get(accountNumber);
     }
 
     private String createTransactionId() {

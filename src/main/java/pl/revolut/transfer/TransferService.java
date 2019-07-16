@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 import pl.revolut.account.Account;
 import pl.revolut.account.AccountNotFoundException;
 import pl.revolut.account.AccountRepository;
+import pl.revolut.transaction.Transaction;
+import pl.revolut.transaction.TransactionRepository;
+import pl.revolut.transaction.TransactionType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

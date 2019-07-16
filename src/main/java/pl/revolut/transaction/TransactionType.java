@@ -1,4 +1,4 @@
-package pl.revolut.transfer;
+package pl.revolut.transaction;
 
 public enum TransactionType {
     INCOME,SPENDING;

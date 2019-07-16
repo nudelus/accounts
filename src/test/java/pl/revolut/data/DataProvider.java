@@ -2,6 +2,7 @@ package pl.revolut.data;
 
 import pl.revolut.account.Account;
 import pl.revolut.account.AccountType;
+import pl.revolut.transfer.Transfer;
 
 public class DataProvider {
 
@@ -25,5 +26,15 @@ public class DataProvider {
         account.setCustomerId("Customer02");
 
         return account;
+    }
+
+    public static Transfer createTransfer() {
+        Transfer transfer = new Transfer();
+        transfer.setAmount(6000d);
+        transfer.setCurrency("HUF");
+        transfer.setSourceAccountNumber("5678-5678-5678");
+        transfer.setTargetAccountNumber("1234-1234-1234");
+
+        return transfer;
     }
 }
