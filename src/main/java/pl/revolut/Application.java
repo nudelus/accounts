@@ -10,7 +10,6 @@ public class Application {
         SparkConfig.init();
         GlobalExceptionHandler.init();
         DependencyInjection.createControllerInstances();
-
     }
 
 
