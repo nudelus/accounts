@@ -13,6 +13,7 @@ import pl.revolut.account.Account;
 import pl.revolut.data.DataProvider;
 import pl.revolut.transaction.Transaction;
 import pl.revolut.transaction.TransactionType;
+import pl.revolut.transfer.ExchangeRateApi;
 import pl.revolut.transfer.Transfer;
 import pl.revolut.util.JsonHelper;
 
@@ -63,16 +64,15 @@ public class AccountApplicationTest {
 
     @Test
     public void testTransfer() throws Exception {
-        initData();
+        Account sourceAccount = createAccount(DataProvider.createForintAccount());
+        Account targetAccount = createAccount(DataProvider.createEuroAccount());
+
         Transfer transfer = DataProvider.createTransfer();
 
         String sourceAccountNumber = transfer.getSourceAccountNumber();
         String targetAccountNumber = transfer.getTargetAccountNumber();
 
-        Account sourceAccount = getAccount(sourceAccountNumber);
-        Account targetAccount = getAccount(targetAccountNumber);
-
-        makeTransfer(transfer);
+        makeTransfer(transfer,HttpStatus.OK_200);
 
         checkTransaction(sourceAccountNumber, targetAccountNumber, TransactionType.SPENDING, transfer);
         checkTransaction(targetAccountNumber, sourceAccountNumber, TransactionType.INCOME, transfer);
@@ -80,12 +80,42 @@ public class AccountApplicationTest {
         Account sourceAccountAfterTransfer = getAccount(sourceAccountNumber);
         Account targetAccountAfterTransfer = getAccount(targetAccountNumber);
 
+        checkSourceBalanceInSameCurrency(sourceAccountAfterTransfer.getBalance(),sourceAccount.getBalance(),transfer.getAmount());
+
+        Double exchangeRate = ExchangeRateApi.getExchangeRate(transfer.getCurrency(),targetAccountAfterTransfer.getCurrency());
+        checkTargetBalanceInDifferentCurrency(targetAccountAfterTransfer.getBalance(),targetAccount.getBalance(),transfer.getAmount(),exchangeRate);
 
     }
 
-    private void initData() throws Exception {
-        createAccount(DataProvider.createEuroAccount());
-        createAccount(DataProvider.createForintAccount());
+    @Test
+    public void testRollBackTransfer() throws Exception {
+        Account sourceAccount = createAccount(DataProvider.createEuroAccount());
+        Account targetAccount =  createAccount(DataProvider.createJenAccount());
+
+        Transfer transfer = DataProvider.createJenTransfer();
+
+        String sourceAccountNumber = transfer.getSourceAccountNumber();
+        String targetAccountNumber = transfer.getTargetAccountNumber();
+
+        makeTransfer(transfer,HttpStatus.BAD_REQUEST_400);
+
+        checkTransactionCount(sourceAccountNumber,0);
+        checkTransactionCount(targetAccountNumber,0);
+
+        Account sourceAccountAfterTransfer = getAccount(sourceAccountNumber);
+        Account targetAccountAfterTransfer = getAccount(targetAccountNumber);
+
+        assertThat("Balance not valid",sourceAccount.getBalance(),is(sourceAccountAfterTransfer.getBalance()));
+        assertThat("Balance not valid",targetAccount.getBalance(),is(targetAccountAfterTransfer.getBalance()));
+
+    }
+
+    private void checkSourceBalanceInSameCurrency(Double balance, Double balanceBeforeTransfer, Double transferAmount) {
+        assertThat("Source balance is not valid",balance,is(balanceBeforeTransfer - transferAmount));
+    }
+
+    private void checkTargetBalanceInDifferentCurrency(Double balance, Double balanceBeforeTransfer, Double transferAmount,Double exchangeRate) {
+        assertThat("Source balance is not valid",balance,is(balanceBeforeTransfer + transferAmount * exchangeRate));
     }
 
     private void checkAccountResponse(Account account, int httpStatus) throws Exception {
@@ -111,7 +141,7 @@ public class AccountApplicationTest {
         assertThat("Response code not valid", deleteResponse.getStatus(), is(HttpStatus.OK_200));
     }
 
-    private void createAccount(Account account) throws Exception {
+    private Account createAccount(Account account) throws Exception {
         ContentResponse postResponse = httpClient.newRequest(ACCOUNTS_URL)
                 .method(HttpMethod.POST)
                 .header(HttpHeader.ACCEPT, APPLICATION_JSON)
@@ -120,6 +150,7 @@ public class AccountApplicationTest {
                 .send();
 
         assertThat("Response code not valid", postResponse.getStatus(), is(HttpStatus.OK_200));
+        return JsonHelper.read(new String(postResponse.getContent()), Account.class);
     }
 
     private Account getAccount(String accountNumber) throws Exception {
@@ -130,6 +161,22 @@ public class AccountApplicationTest {
 
         assertThat("Response code not valid", accountResponse.getStatus(), is(HttpStatus.OK_200));
         return JsonHelper.read(new String(accountResponse.getContent()), Account.class);
+    }
+
+
+    private void checkTransactionCount(String accountNumber,int count) throws Exception {
+        HttpContentResponse transactionsResponse = (HttpContentResponse) httpClient.newRequest(TRANSACTIONS_URL + "/" + accountNumber)
+                .method(HttpMethod.GET)
+                .header(HttpHeader.ACCEPT, APPLICATION_JSON)
+                .send();
+
+        assertThat("Response code not valid", transactionsResponse.getStatus(), is(HttpStatus.OK_200));
+
+
+        String jsonListResponse = new String(transactionsResponse.getContent());
+        Transaction[] responseTransactionList = JsonHelper.read(jsonListResponse, Transaction[].class);
+        assertThat("Account List size no valid", responseTransactionList == null ? 0 : responseTransactionList.length, is(count));
+
     }
 
     private void checkTransaction(String accountNumber, String targetAccountNumber, TransactionType transactionType, Transfer transfer) throws Exception {
@@ -153,7 +200,7 @@ public class AccountApplicationTest {
         assertThat("Transaction date is null", firstTransaction.getTransactionDate(), is(notNullValue()));
     }
 
-    private void makeTransfer(Transfer transfer) throws Exception {
+    private void makeTransfer(Transfer transfer,int responseCode) throws Exception {
         ContentResponse transferResponse = httpClient.newRequest(TRANSFER_URL)
                 .method(HttpMethod.POST)
                 .header(HttpHeader.ACCEPT, APPLICATION_JSON)
@@ -161,7 +208,7 @@ public class AccountApplicationTest {
                 .content(new StringContentProvider(JsonHelper.write(transfer)), APPLICATION_JSON)
                 .send();
 
-        assertThat("Response code not valid", transferResponse.getStatus(), is(HttpStatus.OK_200));
+        assertThat("Response code not valid", transferResponse.getStatus(), is(responseCode));
 
     }
 

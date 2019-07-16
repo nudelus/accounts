@@ -40,6 +40,9 @@ public class TransferService {
 
         List<String> transactionIds = new ArrayList<>();
 
+        Double originalSourceBalance = sourceAccount.get().getBalance();
+        Double originalTargetBalance = targetAccount.get().getBalance();
+
         try {
             String withdrawTransactionId = withdrawAmount(transfer,sourceAccount.get());
             transactionIds.add(withdrawTransactionId);
@@ -49,7 +52,7 @@ public class TransferService {
 
         } catch (Exception e) {
             LOGGER.error("Error occurred during transfer",e);
-            rollBackTransfer(sourceAccount.get(),targetAccount.get(),transactionIds);
+            rollBackTransfer(sourceAccount.get(),originalSourceBalance,targetAccount.get(),originalTargetBalance,transactionIds);
             throw new TransferException();
         }
         LOGGER.debug("Transfer from source account {} to target account {} ended",sourceAccountNumber,targetAccountNumber);
@@ -79,9 +82,11 @@ public class TransferService {
         return transactionRepository.saveTransaction(addTransaction);
     }
 
-    private void rollBackTransfer(Account sourceAccount, Account targetAccount, List<String> transactionIds) {
-        accountRepository.save(sourceAccount);
-        accountRepository.save(targetAccount);
+    private void rollBackTransfer(Account sourceAccount,Double sourceBalance ,Account targetAccount,Double targetBalance,List<String> transactionIds) {
+        sourceAccount.setBalance(sourceBalance);
+        accountRepository.modify(sourceAccount.getAccountNumber(),sourceAccount);
+        targetAccount.setBalance(targetBalance);
+        accountRepository.modify(targetAccount.getAccountNumber(),targetAccount);
         transactionIds.forEach( t -> transactionRepository.removeTransaction(t));
     }
 

@@ -28,12 +28,34 @@ public class DataProvider {
         return account;
     }
 
+    public static Account createJenAccount() {
+        Account account = new Account();
+        account.setBalance(6000d);
+        account.setAccountNumber("2222-2222-2222");
+        account.setAccountType(AccountType.STANDARD);
+        account.setCurrency("JEN");
+        account.setCustomerId("Customer03");
+
+        return account;
+    }
+
+
     public static Transfer createTransfer() {
         Transfer transfer = new Transfer();
         transfer.setAmount(6000d);
         transfer.setCurrency("HUF");
         transfer.setSourceAccountNumber("5678-5678-5678");
         transfer.setTargetAccountNumber("1234-1234-1234");
+
+        return transfer;
+    }
+
+    public static Transfer createJenTransfer() {
+        Transfer transfer = new Transfer();
+        transfer.setAmount(300d);
+        transfer.setCurrency("EUR");
+        transfer.setSourceAccountNumber("1234-1234-1234");
+        transfer.setTargetAccountNumber("2222-2222-2222");
 
         return transfer;
     }
