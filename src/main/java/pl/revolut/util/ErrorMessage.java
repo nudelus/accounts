@@ -1,5 +1,8 @@
 package pl.revolut.util;
 
+/**
+ * The Error message object
+ */
 public class ErrorMessage {
 
     private String message;

@@ -7,6 +7,9 @@ import pl.revolut.transaction.TransactionRepository;
 import pl.revolut.transfer.TransferController;
 import pl.revolut.transfer.TransferService;
 
+/**
+ * The Dependency Injection to create the necessary objects and their dependencies
+ */
 public class DependencyInjection {
 
     public static void createControllerInstances(){

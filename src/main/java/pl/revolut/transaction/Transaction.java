@@ -1,7 +1,11 @@
 package pl.revolut.transaction;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
+/**
+ * The Transaction model object
+ */
 public class Transaction {
 
     private String transactionId;
@@ -84,5 +88,41 @@ public class Transaction {
 
     public void setExchangeRate(Double exchangeRate) {
         this.exchangeRate = exchangeRate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return Objects.equals(transactionId, that.transactionId) &&
+                Objects.equals(accountNumber, that.accountNumber) &&
+                Objects.equals(transactionDate, that.transactionDate) &&
+                Objects.equals(amountInAccountCurrency, that.amountInAccountCurrency) &&
+                Objects.equals(amountInOriginalCurrency, that.amountInOriginalCurrency) &&
+                transactionType == that.transactionType &&
+                Objects.equals(partnerAccountNumber, that.partnerAccountNumber) &&
+                Objects.equals(currency, that.currency) &&
+                Objects.equals(exchangeRate, that.exchangeRate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(transactionId, accountNumber, transactionDate, amountInAccountCurrency, amountInOriginalCurrency, transactionType, partnerAccountNumber, currency, exchangeRate);
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "transactionId='" + transactionId + '\'' +
+                ", accountNumber='" + accountNumber + '\'' +
+                ", transactionDate=" + transactionDate +
+                ", amountInAccountCurrency=" + amountInAccountCurrency +
+                ", amountInOriginalCurrency=" + amountInOriginalCurrency +
+                ", transactionType=" + transactionType +
+                ", partnerAccountNumber='" + partnerAccountNumber + '\'' +
+                ", currency='" + currency + '\'' +
+                ", exchangeRate=" + exchangeRate +
+                '}';
     }
 }

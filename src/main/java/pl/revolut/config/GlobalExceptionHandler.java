@@ -11,6 +11,9 @@ import pl.revolut.util.JsonHelper;
 
 import static spark.Spark.exception;
 
+/**
+ * The Global exception handler to transform application exceptions to json object
+ */
 public final class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);

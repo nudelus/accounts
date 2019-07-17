@@ -2,6 +2,9 @@ package pl.revolut.util;
 
 import spark.ResponseTransformer;
 
+/**
+ * The Json http request transformer
+ */
 public class JsonTransformer implements ResponseTransformer {
 
     @Override

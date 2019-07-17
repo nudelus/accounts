@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The Transaction repository, simple map based in memory data store for transactions
+ */
 public class TransactionRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionRepository.class);
@@ -31,6 +34,7 @@ public class TransactionRepository {
     }
 
     public void removeTransaction(String transactionId) {
+        LOGGER.debug("Transaction saved with id {}",transactionId);
         transactionTable.entrySet().forEach(e -> e.getValue().removeIf(t -> t.getTransactionId().equals(transactionId)));
     }
 

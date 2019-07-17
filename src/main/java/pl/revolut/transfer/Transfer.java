@@ -2,6 +2,9 @@ package pl.revolut.transfer;
 
 import java.util.Objects;
 
+/**
+ * The Transfer model object
+ */
 public class Transfer {
 
     private String sourceAccountNumber;

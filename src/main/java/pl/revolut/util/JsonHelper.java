@@ -2,6 +2,9 @@ package pl.revolut.util;
 
 import com.google.gson.Gson;
 
+/**
+ * The Json helper to handle json mapping
+ */
 public class JsonHelper {
 
     private static final Gson gson = new Gson();

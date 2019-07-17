@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * The Exchange Rate api is a mock for external Api that handles currency exchange
+ */
 public class ExchangeRateApi {
 
     private static final String FORINT = "HUF";

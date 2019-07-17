@@ -10,6 +10,9 @@ import java.util.Optional;
 
 import static spark.Spark.*;
 
+/**
+ * The Account controller object to handle account related CRUD operations
+ */
 public class AccountController {
 
     private AccountRepository accountRepository;

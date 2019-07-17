@@ -3,6 +3,9 @@ package pl.revolut.account;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * The Account data model object
+ */
 public class Account {
 
     private String accountNumber;

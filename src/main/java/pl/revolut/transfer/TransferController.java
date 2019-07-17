@@ -8,6 +8,9 @@ import spark.Route;
 
 import static spark.Spark.post;
 
+/**
+ * The Transfer controller object to make transfer between accounts
+ */
 public class TransferController {
 
     private TransferService transferService;
@@ -27,4 +30,5 @@ public class TransferController {
        transferService.makeTransfer(transfer);
        return "";
     };
+
 }

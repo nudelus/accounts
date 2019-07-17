@@ -7,6 +7,9 @@ import spark.Route;
 
 import static spark.Spark.get;
 
+/**
+ * The Transaction controller object to query transaction data
+ */
 public class TransactionController {
 
     private TransactionRepository transactionRepository;

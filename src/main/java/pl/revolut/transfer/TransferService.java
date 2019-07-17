@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The Transaction service object to handel transfer related business logic
+ */
 public class TransferService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransferService.class);
@@ -30,7 +33,7 @@ public class TransferService {
         String sourceAccountNumber = transfer.getSourceAccountNumber();
         String targetAccountNumber = transfer.getTargetAccountNumber();
 
-        LOGGER.debug("Transfer from source account {} to target account {} started",sourceAccountNumber,targetAccountNumber);
+        LOGGER.debug("Transfer from source account {} to target account {} started", sourceAccountNumber, targetAccountNumber);
 
         Optional<Account> sourceAccount = accountRepository.retrieve(sourceAccountNumber);
         sourceAccount.orElseThrow(() -> new AccountNotFoundException(sourceAccountNumber));
@@ -44,55 +47,55 @@ public class TransferService {
         Double originalTargetBalance = targetAccount.get().getBalance();
 
         try {
-            String withdrawTransactionId = withdrawAmount(transfer,sourceAccount.get());
+            String withdrawTransactionId = withdrawAmount(transfer, sourceAccount.get());
             transactionIds.add(withdrawTransactionId);
 
-            String addTransactionId = addAmount(transfer,targetAccount.get());
+            String addTransactionId = addAmount(transfer, targetAccount.get());
             transactionIds.add(addTransactionId);
 
         } catch (Exception e) {
-            LOGGER.error("Error occurred during transfer",e);
-            rollBackTransfer(sourceAccount.get(),originalSourceBalance,targetAccount.get(),originalTargetBalance,transactionIds);
+            LOGGER.error("Error occurred during transfer", e);
+            rollBackTransfer(sourceAccount.get(), originalSourceBalance, targetAccount.get(), originalTargetBalance, transactionIds);
             throw new TransferException();
         }
-        LOGGER.debug("Transfer from source account {} to target account {} ended",sourceAccountNumber,targetAccountNumber);
+        LOGGER.debug("Transfer from source account {} to target account {} ended", sourceAccountNumber, targetAccountNumber);
     }
 
-    private String withdrawAmount(Transfer transfer,Account sourceAccount) {
+    private String withdrawAmount(Transfer transfer, Account sourceAccount) {
         Double amountToWithDraw = transfer.getAmount();
 
-        if(!transfer.getCurrency().equals(sourceAccount.getCurrency())) {
-            amountToWithDraw = exchange(transfer.getCurrency(),sourceAccount.getCurrency(),amountToWithDraw);
+        if (!transfer.getCurrency().equals(sourceAccount.getCurrency())) {
+            amountToWithDraw = exchange(transfer.getCurrency(), sourceAccount.getCurrency(), amountToWithDraw);
         }
 
         withDrawFromSourceAccount(sourceAccount, amountToWithDraw);
-        Transaction withDrawTransaction = createTransaction(TransactionType.SPENDING,transfer,amountToWithDraw);
-        return  transactionRepository.saveTransaction((withDrawTransaction));
+        Transaction withDrawTransaction = createTransaction(TransactionType.SPENDING, transfer, amountToWithDraw);
+        return transactionRepository.saveTransaction((withDrawTransaction));
     }
 
 
-    private String addAmount(Transfer transfer,Account targetAccount) {
+    private String addAmount(Transfer transfer, Account targetAccount) {
         Double amountToAdd = transfer.getAmount();
 
-        if(!transfer.getCurrency().equals(targetAccount.getCurrency())) {
-            amountToAdd = exchange(transfer.getCurrency(),targetAccount.getCurrency(),amountToAdd);
+        if (!transfer.getCurrency().equals(targetAccount.getCurrency())) {
+            amountToAdd = exchange(transfer.getCurrency(), targetAccount.getCurrency(), amountToAdd);
         }
-        addToTargetAccount(targetAccount,amountToAdd);
-        Transaction addTransaction = createTransaction(TransactionType.INCOME,transfer,amountToAdd);
+        addToTargetAccount(targetAccount, amountToAdd);
+        Transaction addTransaction = createTransaction(TransactionType.INCOME, transfer, amountToAdd);
         return transactionRepository.saveTransaction(addTransaction);
     }
 
-    private void rollBackTransfer(Account sourceAccount,Double sourceBalance ,Account targetAccount,Double targetBalance,List<String> transactionIds) {
+    private void rollBackTransfer(Account sourceAccount, Double sourceBalance, Account targetAccount, Double targetBalance, List<String> transactionIds) {
         sourceAccount.setBalance(sourceBalance);
-        accountRepository.modify(sourceAccount.getAccountNumber(),sourceAccount);
+        accountRepository.modify(sourceAccount.getAccountNumber(), sourceAccount);
         targetAccount.setBalance(targetBalance);
-        accountRepository.modify(targetAccount.getAccountNumber(),targetAccount);
-        transactionIds.forEach( t -> transactionRepository.removeTransaction(t));
+        accountRepository.modify(targetAccount.getAccountNumber(), targetAccount);
+        transactionIds.forEach(t -> transactionRepository.removeTransaction(t));
     }
 
     private void addToTargetAccount(Account account, Double amount) {
-        account.setBalance(account.getBalance() + amount );
-        accountRepository.modify(account.getAccountNumber(),account);
+        account.setBalance(account.getBalance() + amount);
+        accountRepository.modify(account.getAccountNumber(), account);
     }
 
     private void withDrawFromSourceAccount(Account account, Double amount) {
@@ -100,28 +103,28 @@ public class TransferService {
 
         Double newBalance = accountBalance - amount;
 
-        if(newBalance < 0 ) {
+        if (newBalance < 0) {
             throw new InsufficientFundsException(account.getAccountNumber());
         }
 
         account.setBalance(newBalance);
-        accountRepository.modify(account.getAccountNumber(),account);
+        accountRepository.modify(account.getAccountNumber(), account);
 
     }
 
-    private Double exchange(String sourceCurrency,String targetCurrency,Double amount) {
-        if(!sourceCurrency.equalsIgnoreCase(targetCurrency)) {
-            Double exchangeRate = ExchangeRateApi.getExchangeRate(sourceCurrency,targetCurrency);
+    private Double exchange(String sourceCurrency, String targetCurrency, Double amount) {
+        if (!sourceCurrency.equalsIgnoreCase(targetCurrency)) {
+            Double exchangeRate = ExchangeRateApi.getExchangeRate(sourceCurrency, targetCurrency);
             return amount * exchangeRate;
         }
 
         return amount;
     }
 
-    private Transaction createTransaction(TransactionType transactionType,Transfer transfer,Double exchangedAmount) {
+    private Transaction createTransaction(TransactionType transactionType, Transfer transfer, Double exchangedAmount) {
         Transaction transaction = new Transaction();
         transaction.setTransactionType(transactionType);
-        if(TransactionType.INCOME.equals(transactionType)) {
+        if (TransactionType.INCOME.equals(transactionType)) {
             transaction.setAccountNumber(transfer.getTargetAccountNumber());
             transaction.setPartnerAccountNumber(transfer.getSourceAccountNumber());
         } else {
@@ -133,7 +136,7 @@ public class TransferService {
         transaction.setAmountInOriginalCurrency(transfer.getAmount());
         transaction.setCurrency(transfer.getCurrency());
 
-        if(exchangedAmount != transfer.getAmount()) {
+        if (exchangedAmount != transfer.getAmount()) {
             transaction.setExchangeRate(exchangedAmount / transfer.getAmount());
         }
 

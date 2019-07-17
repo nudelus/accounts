@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The Account repository, simple map based in memory data store for accounts
+ */
 public class AccountRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountRepository.class);
