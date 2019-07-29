@@ -9,6 +9,7 @@ import pl.revolut.transaction.Transaction;
 import pl.revolut.transaction.TransactionRepository;
 import pl.revolut.transaction.TransactionType;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +44,8 @@ public class TransferService {
 
         List<String> transactionIds = new ArrayList<>();
 
-        Double originalSourceBalance = sourceAccount.get().getBalance();
-        Double originalTargetBalance = targetAccount.get().getBalance();
+        BigDecimal originalSourceBalance = sourceAccount.get().getBalance();
+        BigDecimal originalTargetBalance = targetAccount.get().getBalance();
 
         try {
             String withdrawTransactionId = withdrawAmount(transfer, sourceAccount.get());
@@ -62,7 +63,7 @@ public class TransferService {
     }
 
     private String withdrawAmount(Transfer transfer, Account sourceAccount) {
-        Double amountToWithDraw = transfer.getAmount();
+        BigDecimal amountToWithDraw = transfer.getAmount();
 
         if (!transfer.getCurrency().equals(sourceAccount.getCurrency())) {
             amountToWithDraw = exchange(transfer.getCurrency(), sourceAccount.getCurrency(), amountToWithDraw);
@@ -75,7 +76,7 @@ public class TransferService {
 
 
     private String addAmount(Transfer transfer, Account targetAccount) {
-        Double amountToAdd = transfer.getAmount();
+        BigDecimal amountToAdd = transfer.getAmount();
 
         if (!transfer.getCurrency().equals(targetAccount.getCurrency())) {
             amountToAdd = exchange(transfer.getCurrency(), targetAccount.getCurrency(), amountToAdd);
@@ -85,7 +86,7 @@ public class TransferService {
         return transactionRepository.saveTransaction(addTransaction);
     }
 
-    private void rollBackTransfer(Account sourceAccount, Double sourceBalance, Account targetAccount, Double targetBalance, List<String> transactionIds) {
+    private void rollBackTransfer(Account sourceAccount, BigDecimal sourceBalance, Account targetAccount, BigDecimal targetBalance, List<String> transactionIds) {
         sourceAccount.setBalance(sourceBalance);
         accountRepository.modify(sourceAccount.getAccountNumber(), sourceAccount);
         targetAccount.setBalance(targetBalance);
@@ -93,17 +94,17 @@ public class TransferService {
         transactionIds.forEach(t -> transactionRepository.removeTransaction(t));
     }
 
-    private void addToTargetAccount(Account account, Double amount) {
-        account.setBalance(account.getBalance() + amount);
+    private void addToTargetAccount(Account account, BigDecimal amount) {
+        account.setBalance(account.getBalance().add(amount));
         accountRepository.modify(account.getAccountNumber(), account);
     }
 
-    private void withDrawFromSourceAccount(Account account, Double amount) {
-        Double accountBalance = account.getBalance();
+    private void withDrawFromSourceAccount(Account account, BigDecimal amount) {
+        BigDecimal accountBalance = account.getBalance();
 
-        Double newBalance = accountBalance - amount;
+        BigDecimal newBalance = accountBalance.subtract(amount);
 
-        if (newBalance < 0) {
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new InsufficientFundsException(account.getAccountNumber());
         }
 
@@ -112,16 +113,16 @@ public class TransferService {
 
     }
 
-    private Double exchange(String sourceCurrency, String targetCurrency, Double amount) {
+    private BigDecimal exchange(String sourceCurrency, String targetCurrency, BigDecimal amount) {
         if (!sourceCurrency.equalsIgnoreCase(targetCurrency)) {
-            Double exchangeRate = ExchangeRateApi.getExchangeRate(sourceCurrency, targetCurrency);
-            return amount * exchangeRate;
+            BigDecimal exchangeRate =BigDecimal.valueOf(ExchangeRateApi.getExchangeRate(sourceCurrency, targetCurrency));
+            return amount.multiply(exchangeRate);
         }
 
         return amount;
     }
 
-    private Transaction createTransaction(TransactionType transactionType, Transfer transfer, Double exchangedAmount) {
+    private Transaction createTransaction(TransactionType transactionType, Transfer transfer, BigDecimal exchangedAmount) {
         Transaction transaction = new Transaction();
         transaction.setTransactionType(transactionType);
         if (TransactionType.INCOME.equals(transactionType)) {
@@ -137,7 +138,7 @@ public class TransferService {
         transaction.setCurrency(transfer.getCurrency());
 
         if (exchangedAmount != transfer.getAmount()) {
-            transaction.setExchangeRate(exchangedAmount / transfer.getAmount());
+            transaction.setExchangeRate(exchangedAmount.divide(transfer.getAmount()));
         }
 
         return transaction;

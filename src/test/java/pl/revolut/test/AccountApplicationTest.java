@@ -17,6 +17,8 @@ import pl.revolut.transfer.ExchangeRateApi;
 import pl.revolut.transfer.Transfer;
 import pl.revolut.util.JsonHelper;
 
+import java.math.BigDecimal;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static spark.Spark.awaitInitialization;
@@ -83,7 +85,7 @@ public class AccountApplicationTest {
         checkSourceBalanceInSameCurrency(sourceAccountAfterTransfer.getBalance(),sourceAccount.getBalance(),transfer.getAmount());
 
         Double exchangeRate = ExchangeRateApi.getExchangeRate(transfer.getCurrency(),targetAccountAfterTransfer.getCurrency());
-        checkTargetBalanceInDifferentCurrency(targetAccountAfterTransfer.getBalance(),targetAccount.getBalance(),transfer.getAmount(),exchangeRate);
+        checkTargetBalanceInDifferentCurrency(targetAccountAfterTransfer.getBalance(),targetAccount.getBalance(),transfer.getAmount(),BigDecimal.valueOf(exchangeRate));
 
     }
 
@@ -110,12 +112,12 @@ public class AccountApplicationTest {
 
     }
 
-    private void checkSourceBalanceInSameCurrency(Double balance, Double balanceBeforeTransfer, Double transferAmount) {
-        assertThat("Source balance is not valid",balance,is(balanceBeforeTransfer - transferAmount));
+    private void checkSourceBalanceInSameCurrency(BigDecimal balance, BigDecimal balanceBeforeTransfer, BigDecimal transferAmount) {
+        assertThat("Source balance is not valid",balance,is(balanceBeforeTransfer.subtract(transferAmount)));
     }
 
-    private void checkTargetBalanceInDifferentCurrency(Double balance, Double balanceBeforeTransfer, Double transferAmount,Double exchangeRate) {
-        assertThat("Source balance is not valid",balance,is(balanceBeforeTransfer + transferAmount * exchangeRate));
+    private void checkTargetBalanceInDifferentCurrency(BigDecimal balance, BigDecimal balanceBeforeTransfer, BigDecimal transferAmount,BigDecimal exchangeRate) {
+        assertThat("Source balance is not valid",balance,is(balanceBeforeTransfer.add(transferAmount.multiply(exchangeRate))));
     }
 
     private void checkAccountResponse(Account account, int httpStatus) throws Exception {

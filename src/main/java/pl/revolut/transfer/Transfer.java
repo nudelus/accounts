@@ -1,5 +1,6 @@
 package pl.revolut.transfer;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
@@ -9,7 +10,7 @@ public class Transfer {
 
     private String sourceAccountNumber;
     private String targetAccountNumber;
-    private Double amount;
+    private BigDecimal amount;
     private String currency;
 
     public String getSourceAccountNumber() {
@@ -28,11 +29,11 @@ public class Transfer {
         this.targetAccountNumber = targetAccountNumber;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

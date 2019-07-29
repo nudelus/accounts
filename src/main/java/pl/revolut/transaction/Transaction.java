@@ -1,5 +1,6 @@
 package pl.revolut.transaction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -11,12 +12,12 @@ public class Transaction {
     private String transactionId;
     private String accountNumber;
     private LocalDateTime transactionDate;
-    private Double amountInAccountCurrency;
-    private Double amountInOriginalCurrency;
+    private BigDecimal amountInAccountCurrency;
+    private BigDecimal amountInOriginalCurrency;
     private TransactionType transactionType;
     private String partnerAccountNumber;
     private String currency;
-    private Double exchangeRate;
+    private BigDecimal exchangeRate;
 
     public String getTransactionId() {
         return transactionId;
@@ -42,19 +43,19 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    public Double getAmountInAccountCurrency() {
+    public BigDecimal getAmountInAccountCurrency() {
         return amountInAccountCurrency;
     }
 
-    public void setAmountInAccountCurrency(Double amountInAccountCurrency) {
+    public void setAmountInAccountCurrency(BigDecimal amountInAccountCurrency) {
         this.amountInAccountCurrency = amountInAccountCurrency;
     }
 
-    public Double getAmountInOriginalCurrency() {
+    public BigDecimal getAmountInOriginalCurrency() {
         return amountInOriginalCurrency;
     }
 
-    public void setAmountInOriginalCurrency(Double amountInOriginalCurrency) {
+    public void setAmountInOriginalCurrency(BigDecimal amountInOriginalCurrency) {
         this.amountInOriginalCurrency = amountInOriginalCurrency;
     }
 
@@ -82,11 +83,11 @@ public class Transaction {
         this.currency = currency;
     }
 
-    public Double getExchangeRate() {
+    public BigDecimal getExchangeRate() {
         return exchangeRate;
     }
 
-    public void setExchangeRate(Double exchangeRate) {
+    public void setExchangeRate(BigDecimal exchangeRate) {
         this.exchangeRate = exchangeRate;
     }
 

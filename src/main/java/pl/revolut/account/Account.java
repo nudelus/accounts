@@ -1,5 +1,6 @@
 package pl.revolut.account;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -13,7 +14,7 @@ public class Account {
     private String customerId;
     private String currency;
     private LocalDateTime creationDate;
-    private Double balance;
+    private BigDecimal balance;
 
     public String getAccountNumber() {
         return accountNumber;
@@ -55,11 +56,11 @@ public class Account {
         this.creationDate = creationDate;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 
